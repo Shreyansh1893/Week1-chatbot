@@ -12,7 +12,7 @@ class ChatAgent:
         self,
         model: str,
         system_prompt: str = "You are a helpful assistant.",
-        max_turns: int = 5,
+        max_turns: int = 7,
         base_url: str = "https://openrouter.ai/api/v1",
     ):
         self.model = model
@@ -104,7 +104,7 @@ def run_chatbot():
     agent = ChatAgent(
         model=model,
         system_prompt="You are a helpful assistant.",
-        max_turns=5,
+        max_turns=7,
     )
 
     print("\nChat started.")
