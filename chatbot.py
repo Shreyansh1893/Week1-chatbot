@@ -78,24 +78,25 @@ class ChatAgent:
 
 
 def choose_model() -> str:
+    
     models = {
-        "1": "openai/gpt-4o-mini",
-        "2": "deepseek/deepseek-v4-flash:free",
-        "3": "meta-llama/llama-3.1-8b-instruct:free",
+        "1": "deepseek/deepseek-v4-flash:free",
+        "2": "openai/gpt-oss-120b:free",
+        "3": "openai/gpt-oss-20b:free",
     }
 
     print("Choose a model:")
-    print("1. openai/gpt-4o-mini")
-    print("2. deepseek/deepseek-v4-flash:free")
-    print("3. meta-llama/llama-3.1-8b-instruct:free")
+    print("1. deepseek/deepseek-v4-flash:free")
+    print("2. openai/gpt-oss-120b:free")
+    print("3. openai/gpt-oss-20b:free")
 
     choice = input("Enter choice number: ")
 
     if choice in models:
         return models[choice]
 
-    print("Invalid choice. Using default model: openai/gpt-4o-mini")
-    return "openai/gpt-4o-mini"
+    print("Invalid choice. Using default model: deepseek/deepseek-v4-flash:free")
+    return "deepseek/deepseek-v4-flash:free"
 
 
 def run_chatbot():

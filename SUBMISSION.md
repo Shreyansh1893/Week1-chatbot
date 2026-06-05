@@ -15,3 +15,5 @@ I made the model like that it remembers the previous conversation for every mess
     Why - Because it is very important to remember the previous conversations to make work better.
 Then I also keep a rolling buffer that keeps only the last 7 turns. 
     Why - Because when model remember list get too long due to which model becomes slower.
+
+Note- the model ''deepseek/deepseek-v4-flash:free'' is not working in my code due to i think missing endpoint.
