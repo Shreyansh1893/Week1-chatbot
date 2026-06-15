@@ -19,7 +19,7 @@ import os
 import json
 import asyncio
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import OpenAI, RateLimitError
 
 from tools import WEB_TOOL_SCHEMAS, WEB_TOOL_FUNCTIONS
 from mcp_tools import ensure_alphaxiv_schemas, call_alphaxiv_tool, ALPHAXIV_TOOL_NAMES
@@ -28,6 +28,7 @@ load_dotenv()
 
 MODEL = os.environ.get("AGENT_MODEL", "gpt-4o-mini")
 BASE_URL = os.environ.get("OPENAI_BASE_URL")  # set to OpenRouter's URL to use OpenRouter
+MAX_TOKENS = int(os.environ.get("AGENT_MAX_TOKENS", "4096"))
 
 
 def _make_client() -> OpenAI:
@@ -69,6 +70,7 @@ def _step1_single_call(question: str) -> str:
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": question},
         ],
+        max_tokens=MAX_TOKENS,
     )
     return resp.choices[0].message.content
 
@@ -130,6 +132,41 @@ class ResearchAgent:
         self._emit("tool_result", {"name": name, "args": args, "result": result})
         return result
 
+    async def _create_completion(self, max_retries: int = 3):
+        """Call the chat completions API, retrying on transient 429
+        rate-limit errors from OpenRouter free-tier providers."""
+        for attempt in range(max_retries):
+            try:
+                return await asyncio.to_thread(
+                    self.client.chat.completions.create,
+                    model=MODEL,
+                    messages=self.messages,
+                    tools=self.tool_schemas,
+                    max_tokens=MAX_TOKENS,
+                )
+            except RateLimitError as e:
+                wait = 5
+                # Try to read OpenRouter's suggested retry delay
+                try:
+                    wait = e.response.json()["error"]["metadata"].get(
+                        "retry_after_seconds", wait
+                    )
+                except Exception:
+                    pass
+                wait = float(wait) + 1
+                if attempt == max_retries - 1:
+                    raise
+                self._emit(
+                    "warning",
+                    {
+                        "message": (
+                            f"Rate limited by provider, retrying in "
+                            f"{wait:.0f}s (attempt {attempt + 1}/{max_retries})..."
+                        )
+                    },
+                )
+                await asyncio.sleep(wait)
+
     async def ask(self, question: str) -> str:
         """Run the full agent loop for a single user question and return
         the final synthesised answer."""
@@ -139,12 +176,7 @@ class ResearchAgent:
         self._emit("user_message", {"content": question})
 
         for _ in range(self.max_turns):
-            response = await asyncio.to_thread(
-                self.client.chat.completions.create,
-                model=MODEL,
-                messages=self.messages,
-                tools=self.tool_schemas,
-            )
+            response = await self._create_completion()
 
             choice = response.choices[0]
             message = choice.message

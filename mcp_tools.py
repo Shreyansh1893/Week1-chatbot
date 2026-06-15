@@ -232,11 +232,17 @@ class _AlphaXivClient:
             raise self._init_error
 
     async def list_tools(self):
+        await self.start()
         async with self._lock:
+            if self._session is None:
+                raise RuntimeError("AlphaXiv MCP session is not available")
             return await self._session.list_tools()
 
     async def call_tool(self, name, args):
+        await self.start()
         async with self._lock:
+            if self._session is None:
+                raise RuntimeError("AlphaXiv MCP session is not available")
             return await self._session.call_tool(name, args)
 
     async def stop(self):
@@ -251,7 +257,7 @@ _live_schemas = None
 
 async def _get_client() -> _AlphaXivClient:
     global _client
-    if _client is None:
+    if _client is None or _client._session is None:
         _client = _AlphaXivClient(ALPHAXIV_MCP_URL)
         await _client.start()
     return _client

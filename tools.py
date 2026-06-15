@@ -23,7 +23,7 @@ REQUEST_HEADERS = {
     )
 }
 
-MAX_PAGE_CHARS = 8000  # truncate fetched page text so we don't blow the context window
+MAX_PAGE_CHARS = int(os.environ.get("MAX_PAGE_CHARS", "3000"))  # truncate fetched page text so we don't blow the context window
 
 
 def web_search(query: str, num_results: int = 5) -> str:
