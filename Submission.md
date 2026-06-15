@@ -10,15 +10,15 @@ The final result is a tool that can search multiple sources, read webpages and p
 
 # One design decision and why
 
-One decision I made was to limit how much text is read from each webpage.
+One decision I made was that to limit how much text is read from each webpage.
 
-When I first started testing, some webpages were extremely long and sending the entire page to the model used a lot of tokens. Most of that content wasn't actually useful for answering the question. To avoid running into context limits, I only send part of the page content to the model.
+When I first started testing, some webpages were too long and sending the entire page to the model used a lot of tokens. Most of that content wasn't actually useful for answering the question. To avoid running into context limits, I only send part of the page content to the model.
 
-The downside is that sometimes useful information could be further down the page, but in practice it worked well and allowed the agent to look at more sources.
+The downside is that sometimes useful information could be further down the page, but in practice it worked well and allowed the agent to search more sources.
 
 # Something that surprised me or didn't work as expected
 
-The AlphaXiv integration was more complicated than I expected. I initially thought I could call it like a normal API, but it actually required an OAuth login flow through the browser and a separate helper process. It took me a while to understand how all the pieces fit together.
+The AlphaXiv integration was more complicated than I expected. I initially thought I could call it like a normal API, but it actually required an OAuth login flow through the browser and a separate helper process. It took some time to understand how all the pieces fit together.
 
 I also ran into an annoying issue where my Serper API key kept showing up as missing even though it was present in my .env file. After debugging it, I found that one of the files was trying to read the environment variable before the .env file had been loaded.
 
