@@ -1,19 +1,33 @@
-#Week 1 Submission of GenAI Task: Multi-Turn Terminal Chatbot
+# What I built and how it works
 
-What I learn-
-I start from basics and I learn about LLM ,API .How AI works.What is the general format of API calling .I learn how AI remembers the previous conversations by sending all messages list to model.What we can extract from response.What we can see from response.choices and response.usage
+For this project I built a research assistant that runs in the terminal, similar to a basic version of Perplexity.
 
+The user enters a question and the AI decides what information it needs to answer it. It can search the web using Serper, fetch the contents of webpages, and search academic papers through AlphaXiv. My code runs whichever tools the model asks for and sends the results back to it. This process repeats until the model has gathered enough information to answer the question.
 
-How I Implemeted the Task-
-I learn the basic things and general format like sending the prompt to model then
-I started by creating a basic API call using the OpenAI SDK with OpenRouter's base URL.
-After understanding the single API call, I converted it into a multi-turn chatbot by using a while True loop. This loop keeps asking the user for input until the user types exit or quit.
-I practice build 1 and 2 ,see the responce.choices and response.usage
-Then for the final submission I implemented a ChatAgent class.The class stores the model name, system prompt, message history, token usage, and OpenRouter client.
-    Why- So that every agent has its own prompt ,own history.
-I made the model like that it remembers the previous conversation for every message, I append the user's message to the messages list, send the full messages list to the model, extract the assistant's reply from the response object, append the assistant reply to list.    
-    Why - Because it is very important to remember the previous conversations to make work better.
-Then I also keep a rolling buffer that keeps only the last 7 turns. 
-    Why - Because when model remember list get too long due to which model becomes slower.
+I first got everything working from the command line so it was easier to debug. After that I added a Textual interface so the user could interact with it through a cleaner terminal UI.
 
-Note- the model ''deepseek/deepseek-v4-flash:free'' is not working in my code due to i think missing endpoint.
+The final result is a tool that can search multiple sources, read webpages and papers, and generate an answer with citations.
+
+# One design decision and why
+
+One decision I made was to limit how much text is read from each webpage.
+
+When I first started testing, some webpages were extremely long and sending the entire page to the model used a lot of tokens. Most of that content wasn't actually useful for answering the question. To avoid running into context limits, I only send part of the page content to the model.
+
+The downside is that sometimes useful information could be further down the page, but in practice it worked well and allowed the agent to look at more sources.
+
+# Something that surprised me or didn't work as expected
+
+The AlphaXiv integration was more complicated than I expected. I initially thought I could call it like a normal API, but it actually required an OAuth login flow through the browser and a separate helper process. It took me a while to understand how all the pieces fit together.
+
+I also ran into an annoying issue where my Serper API key kept showing up as missing even though it was present in my .env file. After debugging it, I found that one of the files was trying to read the environment variable before the .env file had been loaded.
+
+Another issue came up during testing. One of my research queries triggered a lot of searches and page fetches, which made the conversation history very large. Eventually I hit OpenRouter's token limit, and shortly after that my free credits were exhausted, so the request couldn't finish.
+
+# What I'd improve with more time
+
+If I had more time, I would add streaming responses so users could see the answer being generated instead of waiting for the entire response.
+
+I'd also improve the UI by showing tool activity in real time, such as searches, page fetches, and paper lookups. That would make it easier to understand what the agent is doing.
+
+Finally, I would add a way to summarize or remove older tool results from the conversation history. That would help keep the context size under control and reduce the chances of hitting token limits during longer research sessions.
