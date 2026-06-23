@@ -26,7 +26,7 @@ from mcp_tools import ensure_alphaxiv_schemas, call_alphaxiv_tool, ALPHAXIV_TOOL
 
 load_dotenv()
 
-MODEL = os.environ.get("AGENT_MODEL", "gpt-4o-mini")
+MODEL = os.environ.get("AGENT_MODEL", "openrouter/free")
 BASE_URL = os.environ.get("OPENAI_BASE_URL")  # set to OpenRouter's URL to use OpenRouter
 MAX_TOKENS = int(os.environ.get("AGENT_MAX_TOKENS", "4096"))
 
